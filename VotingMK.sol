@@ -1,91 +1,119 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity 0.8.19;
+pragma solidity 0.8.19; 
 
+// import ownership contract from OpenZeppelin
 import "https://github.com/OpenZeppelin/openzeppelin-contracts/blob/master/contracts/access/Ownable.sol";
 
 contract Voting is Ownable {
-struct Voter {
-bool isRegistered;
-bool hasVoted;
-uint votedProposalId;
-}
+    struct Voter {
+        bool isRegistered;
+        bool hasVoted;
+        uint votedProposalId;
+    }
+    struct Proposal {
+        string description;
+        uint voteCount;
+    }
+    enum WorkflowStatus {
+        RegisteringVoters,
+        ProposalsRegistrationStarted,
+        ProposalsRegistrationEnded,
+        VotingSessionStarted,
+        VotingSessionEnded,
+        VotesTallied
+    }
+    event VoterRegistered(address voterAddress);
+    event WorkflowStatusChange(WorkflowStatus previousStatus, WorkflowStatus newStatus);
+    event ProposalRegistered(uint proposalId);
+    event Voted (address voter, uint proposalId);
 
-struct Proposal {
-    string description;
-    uint voteCount;
-}
+    mapping(address => Voter) voters;
+    Proposal[] proposals;
+    uint winningProposalId;
+    WorkflowStatus status = WorkflowStatus.RegisteringVoters;
 
-enum WorkflowStatus {
-    RegisteringVoters,
-    ProposalsRegistrationStarted,
-    ProposalsRegistrationEnded,
-    VotingSessionStarted,
-    VotingSessionEnded,
-    VotesTallied
-}
+    function registerVoter(address _voter) public onlyOwner {
+        require(status == WorkflowStatus.RegisteringVoters, "Voter registration closed or not started");
+        require(voters[_voter].isRegistered == false, "Voter already registered");
+        voters[_voter].isRegistered  = true;
+        emit VoterRegistered(_voter);
+    }
 
-event VoterRegistered(address indexed voterAddress);
-event WorkflowStatusChange(WorkflowStatus previousStatus, WorkflowStatus);
-event ProposalRegistered(uint indexed proposalId);
-event Voted(address indexed voter, uint indexed proposalId);
-event VotesTallied(uint indexed proposalId, uint indexed voteCount);
+    function startProposalRegistration() public onlyOwner {
+        require (status == WorkflowStatus.RegisteringVoters, "Proposal registration closed or not started");
+        status = WorkflowStatus.ProposalsRegistrationStarted;
+        emit WorkflowStatusChange(WorkflowStatus.RegisteringVoters, WorkflowStatus.ProposalsRegistrationStarted);
+    }
 
-mapping(address => Voter) public voters;
-Proposal[] public proposals;
-uint public winningProposalId;
-WorkflowStatus public status = WorkflowStatus.RegisteringVoters;
+    function stopProposalRegistration() public onlyOwner {
+        require (status == WorkflowStatus.ProposalsRegistrationStarted, "Proposal registration already closed");
+        status = WorkflowStatus.ProposalsRegistrationEnded;
+        emit WorkflowStatusChange(WorkflowStatus.ProposalsRegistrationStarted, WorkflowStatus.ProposalsRegistrationEnded);
+    }
 
-function registerVoter(address _voter) public onlyOwner {
-    require(status == WorkflowStatus.RegisteringVoters, "Registration of Voters not allowed at this time");
-    require(!voters[_voter].isRegistered, "This voter is already registered");
-    voters[_voter].isRegistered = true;
-    emit VoterRegistered(_voter);
-}
+    function registerProposal(string memory _description) public {
+        require(status == WorkflowStatus.ProposalsRegistrationStarted, "Proposal registration closed or not started");
+        
+        // Add a check to prevent DoS attack by limiting proposal length
+        require(bytes(_description).length <= 200, "Proposal description too long");
 
-function startProposalRegistration() public onlyOwner {
-    require(status == WorkflowStatus.RegisteringVoters, "Registration of Proposals not allowed at this time");
-    status = WorkflowStatus.ProposalsRegistrationStarted;
-    emit WorkflowStatusChange(WorkflowStatus.RegisteringVoters, status);
-}
+        proposals.push(Proposal(_description, 0));
+        uint proposalId = proposals.length - 1;
+        emit ProposalRegistered(proposalId);
+    }
 
-function stopProposalRegistration() public onlyOwner {
-    require(status == WorkflowStatus.ProposalsRegistrationStarted, "Proposal registration already closed");
-    status = WorkflowStatus.ProposalsRegistrationEnded;
-    emit WorkflowStatusChange(WorkflowStatus.ProposalsRegistrationStarted, status);
-}
+    function startVotingSession() public onlyOwner {
+        require(status == WorkflowStatus.ProposalsRegistrationEnded, "Proposal registration still open or voting already started");
+        status = WorkflowStatus.VotingSessionStarted;
+        emit WorkflowStatusChange(WorkflowStatus.ProposalsRegistrationEnded, WorkflowStatus.VotingSessionStarted);
+    }
 
-function registerProposal(string memory _description) public {
-    require(status == WorkflowStatus.ProposalsRegistrationStarted, "Registration of Proposals not allowed at this time");
-    proposals.push(Proposal(_description, 0));
-    uint proposalId = proposals.length - 1;
-    emit ProposalRegistered(proposalId);
-}
+    function endVotingSession() public onlyOwner {
+        require(status == WorkflowStatus.VotingSessionStarted, "Voting session not started or already ended");
+        status = WorkflowStatus.VotingSessionEnded;
+        emit WorkflowStatusChange(WorkflowStatus.VotingSessionStarted, WorkflowStatus.VotingSessionEnded);
+    }
 
-function startVotingSession() public onlyOwner {
-    require(status == WorkflowStatus.ProposalsRegistrationEnded, "Voting session not allowed at this time");
-    status = WorkflowStatus.VotingSessionStarted;
-    emit WorkflowStatusChange(WorkflowStatus.ProposalsRegistrationEnded, status);
-}
+    function vote(uint proposalId ) public {
+        require(status == WorkflowStatus.VotingSessionStarted, "Voting session not started or already ended");
+        require(voters[msg.sender].isRegistered == true, "Not a registered voter");
+        require(voters[msg.sender].hasVoted == false, "Already voted");
+        require(proposalId < proposals.length, "Invalid proposal ID");
 
-function endVotingSession() public onlyOwner {
-    require(status == WorkflowStatus.VotingSessionStarted, "Voting session already closed");
-    status = WorkflowStatus.VotingSessionEnded;
-    emit WorkflowStatusChange(WorkflowStatus.VotingSessionStarted, status);
-}
-
-function vote(uint proposalId) public {
-    require(status == WorkflowStatus.VotingSessionStarted, "Voting not allowed at this time");
-    Voter storage sender = voters[msg.sender];
-    require(sender.isRegistered, "Not a registered voter");
-    require(!sender.hasVoted, "This voter has already voted");
-    require(proposalId < proposals.length, "Invalid proposal ID");
-    Proposal storage proposal = proposals[proposalId];
-    sender.hasVoted = true;
-    sender.votedProposalId = proposalId;
-    proposal.voteCount += 1;
-    emit Voted(msg.sender, proposalId);
+        // Add a check to prevent DoS attack by limiting gas usage
+        require(gasleft() >= 50000, "Not enough gas");
+    
+    proposals[proposalId].voteCount += 1;
+    voters[msg.sender].hasVoted = true;
+    voters[msg.sender].votedProposalId = proposalId;
+    emit Voted (msg.sender, proposalId);
 }
 
 function getWinner() public onlyOwner {
-    require(status == WorkflowStatus.VotingSessionEnded, "Voting
+    require(status == WorkflowStatus.VotingSessionEnded, "Voting session still open or not ended");
+    status = WorkflowStatus.VotesTallied;
+    emit WorkflowStatusChange(WorkflowStatus.VotingSessionEnded, WorkflowStatus.VotesTallied);
+    uint winnerVotes = 0;
+    for (uint v = 0; v < proposals.length; v++) {
+        if (proposals[v].voteCount > winnerVotes) {
+            winnerVotes = proposals[v].voteCount;
+            winningProposalId = v;
+        }
+    }
+}
+
+function getWinningProposalId() public view returns (uint) {
+    require(status == WorkflowStatus.VotesTallied, "Votes not tallied yet");
+    return winningProposalId;
+}
+
+function getProposalVotePercentage(uint proposalId) public view returns (uint) {
+    require(proposalId < proposals.length, "Invalid proposal ID");
+    uint totalVotes = 0;
+    for (uint i = 0; i < proposals.length; i++) {
+        totalVotes += proposals[i].voteCount;
+    }
+    return totalVotes == 0 ? 0 : proposals[proposalId].voteCount * 100 / totalVotes;
+}
+}
