@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity 0.8.13;
+pragma solidity 0.8.18;
 import "../node_modules/@openzeppelin/contracts/access/Ownable.sol";
 
 
@@ -82,17 +82,24 @@ contract Voting is Ownable {
 
     // ::::::::::::: VOTE ::::::::::::: //
 
-    function setVote( uint _id) external onlyVoters {
-        require(workflowStatus == WorkflowStatus.VotingSessionStarted, 'Voting session havent started yet');
-        require(voters[msg.sender].hasVoted != true, 'You have already voted');
-        require(_id < proposalsArray.length, 'Proposal not found'); // pas obligé, et pas besoin du >0 car uint
 
-        voters[msg.sender].votedProposalId = _id;
+    function setVote(uint proposalId) public {
+        require(workflowStatus == WorkflowStatus.VotingSessionStarted, 'Voting Session not started yet');
+        require(voters[msg.sender].isRegistered, "You are not allowed to vote");
+        require(!voters[msg.sender].hasVoted, "You have already voted");
+        require(proposalId < proposalsArray.length, 'Proposal not found'); // pas obligé, et pas besoin du >0 car uint
+
+        proposalsArray[proposalId].voteCount += 1;
         voters[msg.sender].hasVoted = true;
-        proposalsArray[_id].voteCount++;
+        voters[msg.sender].votedProposalId = proposalId;
 
-        emit Voted(msg.sender, _id);
+        if (proposalsArray[proposalId].voteCount > proposalsArray[winningProposalID].voteCount) {
+            winningProposalID = proposalId;
+        }
+
+        emit Voted(msg.sender, proposalId);
     }
+
 
     // ::::::::::::: STATE ::::::::::::: //
 
@@ -128,16 +135,13 @@ contract Voting is Ownable {
 
 
    function tallyVotes() external onlyOwner {
-       require(workflowStatus == WorkflowStatus.VotingSessionEnded, "Current status is not voting session ended");
-       uint _winningProposalId;
-      for (uint256 p = 0; p < proposalsArray.length; p++) {
-           if (proposalsArray[p].voteCount > proposalsArray[_winningProposalId].voteCount) {
-               _winningProposalId = p;
-          }
-       }
-       winningProposalID = _winningProposalId;
-       
+       require(workflowStatus == WorkflowStatus.VotingSessionEnded, "Current status is not voting session ended"); 
+
        workflowStatus = WorkflowStatus.VotesTallied;
+       // Le calcul du winner a été fait dans setVote() : pour éviter d'utiliser une boucle "for"
+       
        emit WorkflowStatusChange(WorkflowStatus.VotingSessionEnded, WorkflowStatus.VotesTallied);
     }
+
+    
 }

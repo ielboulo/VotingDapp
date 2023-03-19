@@ -1,0 +1,27 @@
+html {
+  font-size: 10px;
+  font-family: sans-serif;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+}
+
+.title_dapp {
+  font-weight: bold;
+  text-align: center;
+}
+
+.btn-conn {
+  background-color: green;
+  color: white;
+  font-weight: bold;
+  float: right;
+  font-size: 24px;
+  padding: 10px;
+}
+
+.p-conn{
+  font-weight: bold;
+} 
