@@ -37,6 +37,13 @@ contract Voting is Ownable {
     event WorkflowStatusChange(WorkflowStatus previousStatus, WorkflowStatus newStatus);
     event ProposalRegistered(uint proposalId);
     event Voted (address voter, uint proposalId);
+
+    constructor(){
+        // we assume that the admin has also the right to vote 
+        //voters[msg.sender] = Voter(true, false, 0); // add admin to voters WL at contract deployment
+        voters[msg.sender].isRegistered = true;
+    }
+
     
     modifier onlyVoters() {
         require(voters[msg.sender].isRegistered, "You're not a voter");
