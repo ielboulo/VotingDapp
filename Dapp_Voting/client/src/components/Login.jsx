@@ -56,6 +56,9 @@ function Login() {
   return (
     <div>
       <h1 className="title_dapp"> Voting DApp </h1>
+      <br/>
+      <h2 className="title_dapp"> -- Admin -- </h2>
+      <br/>
       {web3 ? (
         <p className= "p-conn" >Connected with {accounts[0]}</p>
       ) : (

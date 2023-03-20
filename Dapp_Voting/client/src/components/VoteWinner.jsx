@@ -14,19 +14,19 @@ function VoteWinner() {
   
     const winningProposalID = await contract.methods.winningProposalID().call();
     const proposal = await contract.methods.getOneProposal(winningProposalID).call( { from : accounts[0]});
-    setWinner(`The winner of the votes is "${winningProposalID}" for the "${proposal}"`);
+    setWinner(`The winner of the votes is "${winningProposalID}" for the Proposal : "${proposal}"`);
     setLoading(false);
   };
 
 
   return (
     <div>
-      <button onClick={getWinner} disabled={loading}>
-        Who is the winner GRRRRR?  
+      <button className="button_1" onClick={getWinner} disabled={loading}>
+        Who is the winner ?  
       </button>
 
       <p>
-        current {loading} Winner is = {winner}
+      {winner}
       </p>
     </div>
   );

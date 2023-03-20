@@ -51,12 +51,14 @@ function AddVoter() {
     <div className="inputs">
       <input
           type="text"
+          size="50"
           placeholder="address"
           value={inputAddress}
           onChange={handleAddressChange}
         />
-
-      <button onClick={_addVoter} className="transfer-btn">
+<br/>
+<br/>
+      <button className="bp"  onClick={_addVoter}>
         Add Voter 
       </button>
 

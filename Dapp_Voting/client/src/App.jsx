@@ -16,32 +16,29 @@ function App() {
         <br />
           <Login />
           <br />
-          <br />
           <hr />
 
-          <hr />
-          <h1 className="add_v"> Status Watcher  </h1>
+          <h1 className="title_phase"> Status Watcher  </h1>
           <StatusWatcher />
           <hr />
-          <hr />
 
-          <h1 className="add_v"> Add Voters </h1>
+          <h1 className="title_phase"> Add Voters </h1>
           <AddVoter />
           <hr />
 
-          <h1 className="prop_phase"> Proposal Phase </h1>
+          <h1 className="title_phase"> Proposal Phase </h1>
           <ProposalPhase />
           <hr />
 
-          <h1 className="vote_phase"> Vote Phase </h1>
+          <h1 className="title_phase"> Vote Phase </h1>
           <VotePhase />
           <hr />
 
-          <h1 className="tally_phase"> Tally Votes </h1>
+          <h1 className="title_phase"> Tally Votes </h1>
           <VoteTally />
           <hr />
 
-          <h1 className="winner_vote"> VoteWinner </h1>
+          <h1 className="title_phase"> VoteWinner </h1>
           <VoteWinner />
 
         </div>
