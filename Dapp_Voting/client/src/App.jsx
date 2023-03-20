@@ -5,7 +5,7 @@ import ProposalPhase from "./components/ProposalPhase.jsx";
 import VotePhase from "./components/VotePhase.jsx";
 import VoteTally from "./components/VoteTally";
 import VoteWinner from "./components/VoteWinner";
-
+import StatusWatcher from "./components/StatusWatcher"
 
 function App() {
   return (
@@ -17,6 +17,12 @@ function App() {
           <Login />
           <br />
           <br />
+          <hr />
+
+          <hr />
+          <h1 className="add_v"> Status Watcher  </h1>
+          <StatusWatcher />
+          <hr />
           <hr />
 
           <h1 className="add_v"> Add Voters </h1>
