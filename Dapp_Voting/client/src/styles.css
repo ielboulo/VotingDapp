@@ -1,7 +1,14 @@
 html {
   font-size: 10px;
   font-family: sans-serif;
+
 }
+.bg {
+  background-image: url(./images/imagevotingdapp.jpeg);
+  width: 200px;
+  height: 200px;
+  background-size: cover;
+  }
 
 * {
   margin: 0;
@@ -151,3 +158,4 @@ hr {
   display: inline-block;
   margin: 2rem 1rem 0 0;
 }
+

@@ -1,13 +1,23 @@
 import { EthProvider } from "./contexts/EthContext";
 import Login from "./components/Login";
-import AddVoter from "./components/AddVoter";
+/* import AddVoter from "./components/AddVoter";
 import ProposalPhase from "./components/ProposalPhase.jsx";
 import VotePhase from "./components/VotePhase.jsx";
 import VoteTally from "./components/VoteTally";
+import VoteWinner from "./components/VoteWinner"; */
+import StatusWatcher from "./components/StatusWatcher";
+
+import NewMarc from "./components/NewMarc";
+import ProposalPhase from "./components/ProposalPhase";
+import VotePhase from "./components/VotePhase";
 import VoteWinner from "./components/VoteWinner";
-import StatusWatcher from "./components/StatusWatcher"
+import AddProposal from "./components/AddProposal";
+import AddVote from "./components/AddVote";
+
+
 
 function App() {
+
   return (
     <EthProvider>
       <div id="App">
@@ -21,25 +31,25 @@ function App() {
           <h1 className="title_phase"> Status Watcher  </h1>
           <StatusWatcher />
           <hr />
+          
+          {/* ----------------------------------- */}
+          <br />
+        <br />
+          <h1 className="title_dapp_1"> Voting DApp </h1>
+          <br/>
+          <h2 className="title_dapp_2"> -- Voter -- </h2>
+          <br/>
 
-          <h1 className="title_phase"> Add Voters </h1>
-          <AddVoter />
+          <h1 className="title_phase"> AddProposal </h1>
+          <AddProposal />
           <hr />
 
-          <h1 className="title_phase"> Proposal Phase </h1>
-          <ProposalPhase />
+          <h1 className="title_phase"> AddVote </h1>
+          <AddVote />
           <hr />
 
-          <h1 className="title_phase"> Vote Phase </h1>
-          <VotePhase />
-          <hr />
 
-          <h1 className="title_phase"> Tally Votes </h1>
-          <VoteTally />
-          <hr />
-
-          <h1 className="title_phase"> VoteWinner </h1>
-          <VoteWinner />
+          {/* --------------------------------------- */}
 
         </div>
       </div>
