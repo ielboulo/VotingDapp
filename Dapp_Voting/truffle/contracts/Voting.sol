@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity 0.8.18;
+pragma solidity 0.8.19;
 import "../node_modules/@openzeppelin/contracts/access/Ownable.sol";
 
 /// @title  Smart Contract Dédié a la DApp de Vote Decentralisée
